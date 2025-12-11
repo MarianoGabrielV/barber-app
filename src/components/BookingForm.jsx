@@ -1,6 +1,6 @@
 // src/components/BookingForm.jsx
 import { useState } from "react";
-import { barbers, services, timeSlots } from "../data/barberData";
+import { barbers, services } from "../data/barberData";
 import WhatsAppButton from "./WhatsAppButton";
 
 export default function BookingForm() {
@@ -14,6 +14,9 @@ export default function BookingForm() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [comments, setComments] = useState("");
 
+  // turnos ocupados en esta sesión: clave "barberId__date__time": true
+  const [bookedSlots, setBookedSlots] = useState({});
+
   const handleToggleService = (serviceId) => {
     setSelectedServices((prev) =>
       prev.includes(serviceId)
@@ -24,11 +27,24 @@ export default function BookingForm() {
 
   const handleSelectBarber = (id) => {
     setBarberId(id);
+    setTime(""); // limpio horario al cambiar de barbero
   };
 
   const selectedBarber = barbers.find((b) => b.id === barberId);
   const selectedServiceObjects = services.filter((s) =>
     selectedServices.includes(s.id)
+  );
+
+  const isSlotBooked = (barberId, date, time) => {
+    if (!barberId || !date || !time) return false;
+    const key = `${barberId}__${date}__${time}`;
+    return Boolean(bookedSlots[key]);
+  };
+
+  const barberTimeSlots = selectedBarber?.timeSlots || [];
+
+  const availableSlots = barberTimeSlots.filter(
+    (slot) => !isSlotBooked(barberId, date, slot)
   );
 
   const booking = {
@@ -49,14 +65,28 @@ export default function BookingForm() {
     customerName.trim() !== "" &&
     customerPhone.trim() !== "";
 
+  const handleBookingConfirmed = () => {
+    // marcar el horario como ocupado para ese barbero y fecha
+    const key = `${barberId}__${date}__${time}`;
+    setBookedSlots((prev) => ({
+      ...prev,
+      [key]: true,
+    }));
+
+    // opcional: limpiar solo el horario para obligar a elegir otro
+    setTime("");
+  };
+
   return (
     <section id="turnos" className="my-4">
       <div className="row g-4">
         {/* Col izquierda: formulario */}
         <div className="col-12 col-lg-7">
           <div className="card bg-dark border-0 shadow-lg p-3 h-100">
-            {/* 1. Elegí tu barbero - AHORA CON CARDS */}
-            <h2 className="h5 mb-3 text-info">1. Elegí tu barbero</h2>
+            {/* 1. Elegí tu barbero - CARDS CON BOTÓN */}
+            <h2 className="h5 mb-3 text-info">
+              1. Elegí tu barbero y mirá sus horarios
+            </h2>
             <div className="row g-3 mb-3">
               {barbers.map((barber) => {
                 const isSelected = barber.id === barberId;
@@ -65,9 +95,7 @@ export default function BookingForm() {
                     <div
                       className={`card h-100 bg-black bg-opacity-50 border ${
                         isSelected ? "border-info shadow-lg" : "border-secondary"
-                      } barber-card clickable`}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleSelectBarber(barber.id)}
+                      } barber-card`}
                     >
                       {barber.img && (
                         <img
@@ -82,7 +110,7 @@ export default function BookingForm() {
                           }}
                         />
                       )}
-                      <div className="card-body p-3">
+                      <div className="card-body p-3 d-flex flex-column">
                         <h3 className="h6 text-light mb-1 d-flex justify-content-between align-items-center">
                           <span>{barber.name}</span>
                           {isSelected && (
@@ -95,12 +123,24 @@ export default function BookingForm() {
                           {barber.specialty}
                         </p>
                         {barber.servicesHighlights && (
-                          <ul className="text-secondary small mb-0 ps-3">
+                          <ul className="text-secondary small mb-3 ps-3">
                             {barber.servicesHighlights.map((item) => (
                               <li key={item}>{item}</li>
                             ))}
                           </ul>
                         )}
+
+                        <button
+                          type="button"
+                          className={`btn btn-sm mt-auto ${
+                            isSelected ? "btn-info text-dark" : "btn-outline-info"
+                          }`}
+                          onClick={() => handleSelectBarber(barber.id)}
+                        >
+                          {isSelected
+                            ? "Ver horarios disponibles"
+                            : "Seleccionar barbero"}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -119,7 +159,10 @@ export default function BookingForm() {
                   type="date"
                   className="form-control"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    setDate(e.target.value);
+                    setTime("");
+                  }}
                 />
               </div>
               <div className="col-12 col-md-6">
@@ -130,14 +173,43 @@ export default function BookingForm() {
                   className="form-select"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
+                  disabled={!selectedBarber}
                 >
-                  <option value="">Seleccioná un horario</option>
-                  {timeSlots.map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
+                  {!selectedBarber && (
+                    <option value="">
+                      Seleccioná un barbero para ver horarios
                     </option>
-                  ))}
+                  )}
+                  {selectedBarber && availableSlots.length === 0 && (
+                    <option value="">
+                      Sin horarios disponibles para este día
+                    </option>
+                  )}
+                  {selectedBarber &&
+                    availableSlots.length > 0 && [
+                      <option key="default" value="">
+                        Seleccioná un horario disponible
+                      </option>,
+                      ...availableSlots.map((slot) => (
+                        <option key={slot} value={slot}>
+                          {slot}
+                        </option>
+                      )),
+                    ]}
                 </select>
+                {selectedBarber && availableSlots.length > 0 && (
+                  <p className="small text-secondary mt-1">
+                    Horarios libres para {selectedBarber.name} el día elegido:
+                    {availableSlots.map((slot) => (
+                      <span
+                        key={slot}
+                        className="badge bg-warning text-dark ms-1"
+                      >
+                        {slot}
+                      </span>
+                    ))}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -220,11 +292,15 @@ export default function BookingForm() {
               />
             </div>
 
-            <WhatsAppButton booking={booking} disabled={!canSend} />
+            <WhatsAppButton
+              booking={booking}
+              disabled={!canSend}
+              onAfterSend={handleBookingConfirmed}
+            />
             {!canSend && (
               <p className="small text-warning mt-2">
-                🔔 Completá barbero (tocando una card), fecha, horario, al menos
-                un servicio, nombre y teléfono para poder enviar el turno.
+                🔔 Completá barbero, fecha, horario, al menos un servicio, nombre
+                y teléfono para poder enviar el turno.
               </p>
             )}
           </div>

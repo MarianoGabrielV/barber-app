@@ -11,6 +11,7 @@ export const barbers = [
       "Cortes urbanos",
       "Atención rápida",
     ],
+    timeSlots: ["10:00", "10:30", "11:00", "11:30", "16:00", "16:30"],
   },
   {
     id: "barber-marian",

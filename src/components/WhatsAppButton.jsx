@@ -1,7 +1,7 @@
 // src/components/WhatsAppButton.jsx
 import { clientConfig } from "../config/clientConfig";
 
-export default function WhatsAppButton({ booking, disabled }) {
+export default function WhatsAppButton({ booking, disabled, onAfterSend }) {
   const handleClick = () => {
     if (disabled) return;
 
@@ -46,6 +46,11 @@ ${comments || "Sin comentarios."}
     )}`;
 
     window.open(url, "_blank");
+
+    // Avisamos al formulario que el turno se confirmó
+    if (onAfterSend) {
+      onAfterSend();
+    }
   };
 
   return (
