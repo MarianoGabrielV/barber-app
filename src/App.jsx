@@ -32,7 +32,7 @@ function App() {
 
       <footer className="bg-dark text-center text-secondary py-3 mt-4 border-top border-secondary">
         <small>
-          💈 Barbería - Turnos Online · Desarrollado por GoPedidos
+          💈 Barbería - Desarrollado por GoStyle
         </small>
       </footer>
     </div>

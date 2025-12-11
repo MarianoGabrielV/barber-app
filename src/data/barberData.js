@@ -2,8 +2,8 @@
 
 export const barbers = [
   {
-    id: "barber-juan",
-    name: "Juan",
+    id: "barber-ruli",
+    name: "Ruli",
     specialty: "Degradados, fades y cortes modernos",
     img: "/images/barbers/juan.png", // cambiá el nombre según tu imagen
     servicesHighlights: [
@@ -13,8 +13,30 @@ export const barbers = [
     ],
   },
   {
-    id: "barber-mateo",
-    name: "Mateo",
+    id: "barber-marian",
+    name: "Mariano",
+    specialty: "Cortes clásicos y perfilado de barba",
+    img: "/images/barbers/mateo.png",
+    servicesHighlights: [
+      "Cortes clásicos",
+      "Perfilado de barba",
+      "Ideal para primera vez",
+    ],
+  },
+   {
+    id: "barber-enzo",
+    name: "Enzo",
+    specialty: "Cortes clásicos y perfilado de barba",
+    img: "/images/barbers/mateo.png",
+    servicesHighlights: [
+      "Cortes clásicos",
+      "Perfilado de barba",
+      "Ideal para primera vez",
+    ],
+  },
+   {
+    id: "barber-maxi",
+    name: "Maxi",
     specialty: "Cortes clásicos y perfilado de barba",
     img: "/images/barbers/mateo.png",
     servicesHighlights: [
@@ -24,8 +46,8 @@ export const barbers = [
     ],
   },
   {
-    id: "barber-lucas",
-    name: "Lucas",
+    id: "barber-edu",
+    name: "Edu",
     specialty: "Cortes urbanos y diseño",
     img: "/images/barbers/lucas.png",
     servicesHighlights: [
